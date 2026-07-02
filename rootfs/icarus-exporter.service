@@ -1,0 +1,10 @@
+[Unit]
+Description=Icarus Metrics Exporter
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/icarus-exporter.sh
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,35 @@
+name: Monthly Icarus Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    container:
+      image: archlinux:latest
+    steps:
+      - name: Install base tools
+        run: |
+          pacman -Syu --noconfirm base-devel git archiso wget openssl
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Build kernel
+        run: |
+          cd kernel
+          makepkg -sf --noconfirm
+          cp *.pkg.tar.zst ../artifacts/
+      - name: Build ISO
+        run: |
+          bash ci/build-iso.sh $(git describe --tags)
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: iso/icarus-*.iso
+          tag_name: ${{ github.ref_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
