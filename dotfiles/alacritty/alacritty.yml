@@ -1,0 +1,23 @@
+window:
+  opacity: 0.85
+  padding:
+    x: 12
+    y: 12
+  dynamic_padding: true
+  decorations: none
+
+font:
+  normal:
+    family: "JetBrains Mono"
+    style: Regular
+  size: 10.0
+
+colors:
+  primary:
+    background: '#0a0a0a'
+    foreground: '#d4af37'
+  cursor:
+    text: '#0a0a0a'
+    cursor: '#d4af37'
+
+background_opacity: 0.9

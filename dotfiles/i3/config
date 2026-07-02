@@ -1,0 +1,17 @@
+# Icarus – dark gold, minimal, with blur
+set $mod Mod4
+font pango:JetBrains Mono 10
+new_window pixel 2
+hide_edge_borders both
+gaps inner 10
+gaps outer 0
+
+exec_always --no-startup-id polybar icarus
+exec_always --no-startup-id picom --experimental-backends -b
+exec --no-startup-id feh --bg-scale ~/wallpapers/icarus.png
+
+bindsym $mod+Return exec alacritty
+bindsym $mod+d exec dmenu_run -nb #0a0a0a -nf #d4af37 -sb #d4af37 -sf #0a0a0a
+
+client.focused          #d4af37 #0a0a0a #0a0a0a #d4af37 #0a0a0a
+client.unfocused        #333333 #0a0a0a #0a0a0a #333333 #0a0a0a

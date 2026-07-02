@@ -1,0 +1,27 @@
+#!/usr/bin/bash
+# This hook runs after root is mounted, copies everything to tmpfs, and switches root.
+
+run_hook() {
+    local root_dev=$(getarg root=)
+    local real_root="/new_root"
+    local ram_root="/ram_root"
+
+    # Mount the real root (USB) readonly
+    mkdir -p "$real_root"
+    mount -o ro "$root_dev" "$real_root"
+
+    # Create tmpfs for RAM root
+    mount -t tmpfs -o size=80% tmpfs "$ram_root"
+
+    # Copy everything into RAM
+    cp -a "$real_root/"* "$ram_root/"
+
+    # Optional: mount an overlay for persistence if a dedicated partition exists
+    # (We'll keep it simple for now – pure RAM with no persistence)
+
+    # Unmount the physical root
+    umount "$real_root"
+
+    # Switch root to RAM
+    exec switch_root "$ram_root" /sbin/init
+}

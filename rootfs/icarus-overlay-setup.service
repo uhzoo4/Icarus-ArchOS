@@ -1,0 +1,9 @@
+[Unit]
+Description=Icarus persistent overlay
+Before=local-fs.target
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/icarus-overlay
+RemainAfterExit=yes
+[Install]
+WantedBy=local-fs.target
