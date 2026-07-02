@@ -1,5 +1,5 @@
 #!/bin/bash
-# This tells mkinitcpio how to install the hook.
+
 build() {
     add_runscript
 }
