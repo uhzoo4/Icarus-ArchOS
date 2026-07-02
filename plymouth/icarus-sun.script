@@ -1,0 +1,37 @@
+// Icarus Sun boot animation script (Plymouth)
+// Displays a golden sun that expands and contracts.
+// Requires a background image "sun.png" in the same directory.
+
+bg_image = Image("sun.png");
+screen_width = Window.GetWidth();
+screen_height = Window.GetHeight();
+image_ratio = bg_image.GetWidth() / bg_image.GetHeight();
+
+// Scale the sun to 30% of screen height, maintain aspect
+target_height = screen_height * 0.3;
+target_width = target_height * image_ratio;
+
+sun = Sprite(bg_image);
+sun.SetX(screen_width / 2 - target_width / 2);
+sun.SetY(screen_height / 2 - target_height / 2);
+sun.SetWidth(target_width);
+sun.SetHeight(target_height);
+sun.SetOpacity(0);
+
+// Fade in
+sun.SetOpacity(0);
+Plymouth.SetRefreshFunction(function()
+{
+  local op = sun.GetOpacity();
+  if (op < 1.0) {
+    op += 0.02;
+    sun.SetOpacity(op);
+  }
+  // Pulse scale
+  local time = Plymouth.GetTime();
+  local scale = 1.0 + 0.05 * Math.Sin(time * 2.0);
+  sun.SetWidth(target_width * scale);
+  sun.SetHeight(target_height * scale);
+  sun.SetX(screen_width / 2 - (target_width * scale) / 2);
+  sun.SetY(screen_height / 2 - (target_height * scale) / 2);
+});

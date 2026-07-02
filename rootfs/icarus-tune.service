@@ -1,0 +1,10 @@
+[Unit]
+Description=Icarus Auto-Tuning Daemon
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/icarus-tune.sh
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

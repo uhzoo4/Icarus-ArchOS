@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Icarus Sun
+Description=Boot animation for Icarus OS
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/icarus-sun
+ScriptFile=/usr/share/plymouth/themes/icarus-sun/icarus-sun.script
