@@ -1,0 +1,38 @@
+# Maintainer: You <hanshu12yt@email.com>
+# Icarus custom kernel – Apple‑style unified memory, zero‑bloat, native‑compiled
+
+pkgname=linux-icarus
+pkgver=6.9.7   # use latest when building
+pkgrel=1
+pkgdesc="Icarus kernel – the wolf's heart: native, no‑mitigations, HZ1000, UMA-ready"
+arch=('x86_64')
+url="https://github.com/uhzoo4/Icarus-ArchOS"
+license=('GPL2')
+makedepends=('bc' 'cpio' 'gettext' 'libelf' 'pahole' 'perl' 'python' 'tar' 'xz')
+options=('!strip')
+source=("https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-${pkgver}.tar.xz"
+        "config-icarus"
+        "0001-icarus-base.patch")
+sha256sums=('SKIP' 'SKIP' 'SKIP')
+
+prepare() {
+  cd linux-${pkgver}
+  patch -p1 < ../0001-icarus-base.patch   # placeholder, you can add real patches later
+  cp ../config-icarus .config
+  make olddefconfig
+}
+
+build() {
+  cd linux-${pkgver}
+  export CFLAGS="-O3 -march=native -flto -fomit-frame-pointer -pipe"
+  export CXXFLAGS="$CFLAGS"
+  make -j$(nproc) bzImage modules
+}
+
+package() {
+  cd linux-${pkgver}
+  make INSTALL_MOD_PATH="$pkgdir" modules_install
+  install -Dm644 arch/x86/boot/bzImage "$pkgdir/boot/vmlinuz-linux-icarus"
+  install -Dm644 .config "$pkgdir/boot/config-linux-icarus"
+  install -Dm644 ../icarus.preset "$pkgdir/etc/mkinitcpio.d/linux-icarus.preset"
+}
