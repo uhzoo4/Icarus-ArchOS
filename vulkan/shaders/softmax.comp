@@ -1,0 +1,48 @@
+#version 450
+// Apply softmax row-wise to a 2D matrix.
+// Workgroup: 256 threads.
+
+layout(local_size_x = 256) in;
+
+layout(std430, set = 0, binding = 0) buffer Input { float inp[]; };
+layout(std430, set = 0, binding = 1) buffer Output { float out_buf[]; };
+
+layout(push_constant) uniform Params {
+    uint rows;
+    uint cols;
+} p;
+
+shared float max_val;
+shared float sum_exp;
+
+void main() {
+    uint row = gl_WorkGroupID.x;
+    uint tid = gl_LocalInvocationID.x;
+    uint stride = gl_WorkGroupSize.x;
+
+    // Find max per row
+    float local_max = -1e30;
+    for (uint i = tid; i < p.cols; i += stride) {
+        float val = inp[row * p.cols + i];
+        if (val > local_max) local_max = val;
+    }
+    // reduction (simple atomic max; proper parallel reduction is longer)
+    atomicMax(floatBitsToInt(max_val), floatBitsToInt(local_max));
+    barrier();
+    float m = intBitsToFloat(max_val);
+
+    // Compute exp and sum
+    float local_sum = 0.0;
+    for (uint i = tid; i < p.cols; i += stride) {
+        float v = exp(inp[row * p.cols + i] - m);
+        out_buf[row * p.cols + i] = v;
+        local_sum += v;
+    }
+    atomicAdd(sum_exp, local_sum);
+    barrier();
+
+    // Normalize
+    for (uint i = tid; i < p.cols; i += stride) {
+        out_buf[row * p.cols + i] /= sum_exp;
+    }
+}

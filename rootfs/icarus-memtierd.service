@@ -1,2 +1,10 @@
 [Unit]
-Description=Icarus Memory Tiering Engine
+Description=Icarus Memory Tiering Daemon
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/icarus-memtierd.sh
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,18 @@
+#version 450
+// GELU activation in-place.
+layout(local_size_x = 256) in;
+
+layout(std430, set = 0, binding = 0) buffer Data { float data[]; };
+
+layout(push_constant) uniform Params {
+    uint total_elements;
+} p;
+
+void main() {
+    uint idx = gl_GlobalInvocationID.x;
+    if (idx >= p.total_elements) return;
+    float x = data[idx];
+    // tanh approximation
+    float cdf = 0.5 * (1.0 + tanh(0.7978845608 * (x + 0.044715 * x * x * x)));
+    data[idx] = x * cdf;
+}

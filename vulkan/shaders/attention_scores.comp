@@ -1,0 +1,32 @@
+#version 450
+// Fused scaled dot-product attention: S = Q * K^T / sqrt(d_k)
+// Q: [batch*heads, seq_q, d_k]
+// K: [batch*heads, seq_k, d_k]
+// Workgroup: 16x16, each thread computes one score element.
+
+layout(local_size_x = 16, local_size_y = 16) in;
+
+layout(std430, set = 0, binding = 0) readonly buffer Q { float q[]; };
+layout(std430, set = 0, binding = 1) readonly buffer K { float k[]; };
+layout(std430, set = 0, binding = 2) writeonly buffer S { float s[]; };
+
+layout(push_constant) uniform Params {
+    uint B;      // batch * heads
+    uint Q_len;
+    uint K_len;
+    uint D;      // d_k
+    float scale; // 1 / sqrt(D)
+} p;
+
+void main() {
+    uint row = gl_GlobalInvocationID.y;
+    uint col = gl_GlobalInvocationID.x;
+    if (row >= p.Q_len || col >= p.K_len) return;
+
+    float sum = 0.0;
+    // Direct accumulation for simplicity; a tiled version would be larger.
+    for (uint d = 0; d < p.D; ++d) {
+        sum += q[row * p.D + d] * k[col * p.D + d];
+    }
+    s[row * p.K_len + col] = sum * p.scale;
+}s

@@ -1,0 +1,51 @@
+#version 450
+// Layer normalization over the last dimension.
+// Each workgroup handles one row.
+
+layout(local_size_x = 256) in;
+
+layout(std430, set = 0, binding = 0) readonly buffer Input { float x[]; };
+layout(std430, set = 0, binding = 1) readonly buffer Gamma { float g[]; };
+layout(std430, set = 0, binding = 2) readonly buffer Beta { float b[]; };
+layout(std430, set = 0, binding = 3) writeonly buffer Output { float y[]; };
+
+layout(push_constant) uniform Params {
+    uint rows;
+    uint cols;
+    float eps;
+} p;
+
+shared float mean_val;
+shared float var_val;
+
+void main() {
+    uint row = gl_WorkGroupID.x;
+    uint tid = gl_LocalInvocationID.x;
+    uint stride = gl_WorkGroupSize.x;
+
+    // Mean
+    float local_sum = 0.0;
+    for (uint i = tid; i < p.cols; i += stride) {
+        local_sum += x[row * p.cols + i];
+    }
+    atomicAdd(mean_val, local_sum);
+    barrier();
+    float mean = mean_val / float(p.cols);
+
+    // Variance
+    float local_var = 0.0;
+    for (uint i = tid; i < p.cols; i += stride) {
+        float diff = x[row * p.cols + i] - mean;
+        local_var += diff * diff;
+    }
+    atomicAdd(var_val, local_var);
+    barrier();
+    float var = var_val / float(p.cols);
+
+    // Normalize
+    float inv_std = 1.0 / sqrt(var + p.eps);
+    for (uint i = tid; i < p.cols; i += stride) {
+        float norm = (x[row * p.cols + i] - mean) * inv_std;
+        y[row * p.cols + i] = norm * g[i] + b[i];
+    }
+}
