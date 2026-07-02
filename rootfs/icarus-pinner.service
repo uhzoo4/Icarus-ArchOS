@@ -1,0 +1,11 @@
+[Unit]
+Description=Icarus Compute Pinner
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/icarus-pinner.sh
+Environment=ISOLATED_CPUS=2,3
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

@@ -80,7 +80,7 @@ title   Icarus OS
 linux   /vmlinuz-linux-icarus
 initrd  /intel-ucode.img
 initrd  /initramfs-linux-icarus.img
-options root=UUID=$(blkid -s UUID -o value /dev/disk/by-label/ROOT) rw mitigations=off quiet loglevel=0
+options root=UUID=$(blkid -s UUID -o value /dev/disk/by-label/ROOT) rw mitigations=off quiet loglevel=0 isolcpus=2,3 nohz_full=2,3 rcu_nocbs=2,3
 EOF
 
 # Clone the Icarus repository
