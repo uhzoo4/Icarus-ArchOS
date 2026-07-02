@@ -15,3 +15,6 @@ bindsym $mod+d exec dmenu_run -nb #0a0a0a -nf #d4af37 -sb #d4af37 -sf #0a0a0a
 
 client.focused          #d4af37 #0a0a0a #0a0a0a #d4af37 #0a0a0a
 client.unfocused        #333333 #0a0a0a #0a0a0a #333333 #0a0a0a
+
+# Secret key: switch from stealth to desktop
+bindsym Ctrl+Alt+F12 exec pkill fbterm; exec i3

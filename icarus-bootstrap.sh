@@ -39,7 +39,7 @@ mount "$EFI_PART" "$WORKDIR/boot"
 echo "Installing base packages..."
 pacstrap "$WORKDIR" base base-devel linux-firmware intel-ucode iwd vim git \
     networkmanager sudo zsh xorg-server xorg-xinit i3-wm alacritty \
-    polybar picom feh dmenu plymouth bc rsync
+    polybar picom feh dmenu plymouth bc rsync fbterm
 
 # 4. Generate fstab
 genfstab -U "$WORKDIR" >> "$WORKDIR/etc/fstab"
@@ -104,14 +104,16 @@ mkinitcpio -p linux-icarus
 cd /home/icarus/icarus-linux
 make install-configs
 
-# Enable Grimoire Keeper and Auto-tune and Sentinel
+# Enable Grimoire Keeper, Auto-tune, Sentinel, and Stealth
 cp rootfs/icarus-grimoire-keeper.sh /usr/local/bin/
 cp rootfs/icarus-tune.sh /usr/local/bin/
 cp rootfs/icarus-sentinel.sh /usr/local/bin/
+cp rootfs/icarus-stealth.sh /usr/local/bin/
 cp rootfs/*.service rootfs/*.timer /etc/systemd/system/
 systemctl enable icarus-grimoire.timer
 systemctl enable icarus-tune.service
 systemctl enable icarus-sentinel.service
+systemctl enable icarus-stealth.service
 
 # Plymouth theme
 cd plymouth
