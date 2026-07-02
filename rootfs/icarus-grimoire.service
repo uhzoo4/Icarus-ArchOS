@@ -1,5 +1,5 @@
 [Unit]
-Description=Icarus Grimoire Keeper – auto-commit repository changes
+Description=Icarus Grimoire Keeper
 
 [Service]
 Type=oneshot

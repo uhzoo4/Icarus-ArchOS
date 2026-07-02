@@ -1,0 +1,14 @@
+# rootfs/icarus-welcome.service
+[Unit]
+Description=Icarus Welcome Wizard
+ConditionFirstBoot=yes
+Before=multi-user.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/icarus-welcome.sh
+StandardInput=tty
+TTYPath=/dev/tty1
+
+[Install]
+WantedBy=multi-user.target

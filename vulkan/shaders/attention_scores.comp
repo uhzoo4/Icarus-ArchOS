@@ -29,4 +29,4 @@ void main() {
         sum += q[row * p.D + d] * k[col * p.D + d];
     }
     s[row * p.K_len + col] = sum * p.scale;
-}s
+}

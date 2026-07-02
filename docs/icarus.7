@@ -1,0 +1,78 @@
+.TH ICARUS 7 "2026-07-02" "Icarus OS" "Icarus Manual"
+.SH NAME
+Icarus \- The Wolf in Sheep's Clothing OS
+.SH DESCRIPTION
+.B Icarus
+is a custom-built Arch Linux derivative ruthlessly optimized for AI workloads on low-spec Intel hardware. It employs a hand-compiled, mitigation-free kernel, unified memory via Vulkan, a RAM-root filesystem for near-instant I/O, and a stealth terminal disguise.
+.SH ARCHITECTURE
+.TP
+.BR linux-icarus
+A stripped-down kernel featuring no security mitigations, full preemption, a 1000Hz tick rate, and native Intel i915 GPU support.
+.TP
+.B RAM-root & Btrfs Snapshots
+The root filesystem is copied into a tmpfs at boot for near-instant response. Persistent data is maintained via Btrfs subvolumes with automated hourly snapshots via Snapper.
+.TP
+.B Vulkan UMA Engine
+A zero-copy GPU compute pipeline leveraging Vulkan storage buffers mapped directly to NumPy arrays. It utilizes custom compute shaders for Matrix Multiplication, Attention Scores, Softmax, LayerNorm, and GELU.
+.TP
+.B Rust Kernel Module
+The experimental \fIicarus_rust\fR module provides safe system-level observability and procfs interfaces (e.g., /proc/icarus).
+.SH SYSTEM DAEMONS
+The following daemons manage the lifecycle and performance of the OS:
+.RS 4
+.TP
+.BR icarus-sentinel (8)
+Thermal and memory guardian. Monitors CPU/GPU temperatures and proactively triggers memory compaction before OOM conditions occur.
+.TP
+.BR icarus-tune (8)
+Dynamically adjusts CPU governors and GPU frequencies based on system load.
+.TP
+.BR icarus-memtierd (8)
+Manages memory tiering, migrating pages between Hot (RAM), Warm (zram), and Cold (SSD Swap) storage based on usage thresholds.
+.TP
+.BR icarus-stealth (8)
+A decoy 4.4BSD Unix terminal utilizing fbterm to conceal the graphical desktop. Can be bypassed via Ctrl+Alt+F12.
+.TP
+.BR icarus-exporter (8)
+Exposes Prometheus-compatible system metrics (temperature, memory, zram) on port 9100.
+.TP
+.BR icarus-grimoire-keeper (8)
+Automated hourly Git commits of all configuration drift to the main repository.
+.RE
+.SH ESSENTIAL COMMANDS
+.TP
+.B icarus-master.sh \fI/dev/sdX\fR
+The irreversible master assembly script. Automates partitioning, bootstrapping, kernel compilation, and service deployment.
+.TP
+.B probe-hardware.sh
+Generates a highly specific kernel configuration fragment tailored to the exact CPU topology and GPU architecture of the host.
+.TP
+.B icarus-backup.sh \fI/dev/sdX1\fR
+Creates an AES256-encrypted tarball of the persistent Btrfs overlay.
+.TP
+.B run-tests.sh
+Executes the comprehensive Icarus test suite, validating RAM-root integrity, Vulkan UMA buffers, thermal throttling, and zram configurations.
+.TP
+.B bench-all.sh
+Triggers eBPF-based benchmarks (\fBgpu_alloc.bt\fR, \fBvulkan_cmd.bt\fR, \fBmem_pressure.bt\fR) to trace latency and memory pressure.
+.SH DIRECTORY STRUCTURE
+.TP
+.I /usr/local/bin/
+Contains all primary Icarus shell scripts and utilities.
+.TP
+.I /etc/systemd/system/
+Holds the custom systemd services and timers driving the Icarus ecosystem.
+.TP
+.I /home/icarus/icarus-linux/
+The master repository and source of truth containing kernel configs, initramfs hooks, dotfiles, Vulkan shaders, and eBPF traces.
+.SH AUTOMATION & CI
+.B Icarus
+integrates deeply with GitHub Actions. Pushing a version tag via \fBmake release\fR triggers the \fBmonthly-release.yml\fR workflow, which automatically compiles the kernel, generates a bootable ISO using \fBarchiso\fR, and attaches it as a GitHub release artifact.
+.SH SEE ALSO
+.BR i3 (1),
+.BR picom (1),
+.BR polybar (1),
+.BR bpf (2),
+.BR vulkan (7)
+.SH AUTHOR
+Forged by The Icarus Project

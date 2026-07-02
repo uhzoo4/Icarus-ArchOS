@@ -1,0 +1,18 @@
+// Trace Intel i915 GPU buffer allocations and lifetimes.
+kprobe:i915_gem_object_create
+{
+    @allocations[arg0] = nsecs;
+    printf("i915 object create: addr=%p\n", arg0);
+}
+
+kretprobe:i915_gem_object_create
+{
+    $ns = nsecs - @allocations[arg0];
+    delete(@allocations[arg0]);
+    @create_latency_us = hist($ns / 1000);
+}
+
+kprobe:i915_gem_object_free
+{
+    printf("i915 object free: addr=%p\n", arg0);
+}

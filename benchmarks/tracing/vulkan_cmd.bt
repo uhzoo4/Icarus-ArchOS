@@ -1,0 +1,14 @@
+// Measure Vulkan compute queue submit-to-complete latency.
+// Requires kernel symbols from ANV driver.
+kprobe:anv_queue_submit
+{
+    @submit_time[tid] = nsecs;
+}
+
+kretprobe:anv_queue_submit
+/ @submit_time[tid] /
+{
+    $lat = nsecs - @submit_time[tid];
+    @queue_latency_us = hist($lat / 1000);
+    delete(@submit_time[tid]);
+}

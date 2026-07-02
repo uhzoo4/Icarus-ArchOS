@@ -1,5 +1,5 @@
 [Unit]
-Description=Run Icarus Grimoire Keeper every hour
+Description=Run Grimoire Keeper every hour
 
 [Timer]
 OnCalendar=hourly

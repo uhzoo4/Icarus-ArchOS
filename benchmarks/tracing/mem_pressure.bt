@@ -1,0 +1,10 @@
+// Count memory compaction and reclaim events.
+tracepoint:compaction:mm_compaction_begin
+{
+    @compaction_count = count();
+}
+
+kprobe:shrink_node
+{
+    @reclaim_count = count();
+}

@@ -1,0 +1,16 @@
+[Unit]
+Description=Icarus Stealth Mode Fake Terminal
+Before=display-manager.service
+Conflicts=getty@tty1.service
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/icarus-stealth.sh
+ExecStopPost=/usr/bin/pkill -9 -f fbterm
+StandardInput=tty
+TTYPath=/dev/tty1
+TTYReset=yes
+TTYVHangup=yes
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,60 @@
+#version 450
+// Fused Attention Scores + Softmax
+// Computes S = Q*K^T * scale, then applies softmax per row in-place.
+// Each workgroup processes one row of the output.
+// Requires shared memory for reduction.
+layout(local_size_x = 256) in;
+
+layout(std430, set = 0, binding = 0) readonly buffer Q { float q[]; };
+layout(std430, set = 0, binding = 1) readonly buffer K { float k[]; };
+layout(std430, set = 0, binding = 2) buffer S { float s[]; };
+
+layout(push_constant) uniform Params {
+    uint Q_len;
+    uint K_len;
+    uint D;
+    float scale;
+} p;
+
+shared float shared_max;
+shared float shared_sum;
+shared float shared_data[256]; // reuse for partial results
+
+void main() {
+    uint row = gl_WorkGroupID.x;
+    uint tid = gl_LocalInvocationID.x;
+    uint stride = gl_WorkGroupSize.x;
+
+    // Step 1: Compute scores for this row
+    float local_max = -1e30;
+    for (uint i = tid; i < p.K_len; i += stride) {
+        float dot = 0.0;
+        for (uint d = 0; d < p.D; ++d) {
+            dot += q[row * p.D + d] * k[i * p.D + d];
+        }
+        float val = dot * p.scale;
+        s[row * p.K_len + i] = val;
+        if (val > local_max) local_max = val;
+    }
+
+    // Reduction for max
+    // (Simplified; full parallel reduction is longer)
+    atomicMax(floatBitsToInt(shared_max), floatBitsToInt(local_max));
+    barrier();
+    float row_max = intBitsToFloat(shared_max);
+
+    // Step 2: Compute exp and sum
+    float local_sum = 0.0;
+    for (uint i = tid; i < p.K_len; i += stride) {
+        float val = exp(s[row * p.K_len + i] - row_max);
+        s[row * p.K_len + i] = val;
+        local_sum += val;
+    }
+    atomicAdd(shared_sum, local_sum);
+    barrier();
+
+    // Step 3: Normalize
+    for (uint i = tid; i < p.K_len; i += stride) {
+        s[row * p.K_len + i] /= shared_sum;
+    }
+}
