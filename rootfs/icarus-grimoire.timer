@@ -1,0 +1,9 @@
+[Unit]
+Description=Run Icarus Grimoire Keeper every hour
+
+[Timer]
+OnCalendar=hourly
+Persistent=true
+
+[Install]
+WantedBy=timers.target

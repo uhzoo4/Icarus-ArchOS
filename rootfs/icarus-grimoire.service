@@ -1,0 +1,7 @@
+[Unit]
+Description=Icarus Grimoire Keeper – auto-commit repository changes
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/icarus-grimoire-keeper.sh
+User=icarus
