@@ -1,0 +1,10 @@
+[Unit]
+Description=Icarus System Sentinel
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/icarus-sentinel.sh
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
